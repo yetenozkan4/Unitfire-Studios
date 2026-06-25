@@ -5,7 +5,16 @@ from pymongo import MongoClient
 import requests
 
 app = Flask(__name__, static_folder=".", static_url_path="")
-CORS(app)
+CORS(app
+     
+import traceback
+# ... diğer kodlar ...
+try:
+    # Başlatma kodların
+    app.run(debug=True)
+except Exception:
+    print(traceback.format_exc())
+    
 
 # AYARLAR: Kendi anahtarlarını buraya gir!
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/") 
