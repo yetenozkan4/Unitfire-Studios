@@ -2,82 +2,100 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UNITFIRE STUDIOS // OMNIRA INTEGRATED</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Unitfire Studios</title>
     <style>
-        /* 1. GÖRSEL DÜNYA (Otoban + Stüdyo) */
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:#050507; color:#fff; font-family:'Rajdhani', sans-serif; overflow-x:hidden; }
-        nav { position:fixed; top:0; width:100%; padding:40px; display:flex; justify-content:space-between; z-index:1000; background:rgba(0,0,0,0.6); }
-        .links a { margin-left:30px; color:#fff; text-decoration:none; cursor:pointer; font-size:0.8rem; letter-spacing:2px; }
-        #roadCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+        body, html { margin: 0; padding: 0; background: #050507; color: #fff; font-family: -apple-system, sans-serif; overflow-x: hidden; }
         
-        /* 2. OMNIRA YÖNETİM PANELİ (Admin + AI) */
-        #omnira-ui { display:none; position:fixed; top:100px; right:50px; width:500px; height:80vh; background:#1a1a1a; border:2px solid #41bbff; z-index:9999; border-radius:15px; padding:25px; overflow-y:auto; }
-        .input-box { width:100%; padding:12px; margin:10px 0; background:#000; border:1px solid #333; color:#fff; }
-        .btn { width:100%; padding:12px; background:#41bbff; border:none; cursor:pointer; color:#000; font-weight:bold; }
+        nav { position: fixed; top: 40px; left: 40px; z-index: 999; display: flex; gap: 30px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; }
+        nav a { color: #555; text-decoration: none; transition: 0.3s; }
+        nav a:hover { color: #fff; }
+        
+        section { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        
+        /* Canvaslar */
+        #warpCanvas, #roadCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        
+        .content { position: relative; z-index: 10; text-align: center; }
+        .auth-box { background: #0a0a0c; padding: 40px; border: 1px solid #1a1a1a; width: 300px; z-index: 10; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; background: #000; border: 1px solid #333; color: #fff; }
+        button { cursor: pointer; background: #fff; color: #000; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">UNITFIRE STUDIOS</div>
-        <div class="links">
-            <a href="#home">HOME</a>
-            <a onclick="document.getElementById('omnira-ui').style.display='block'">ARTIFICIAL INTELLIGENCE - AI</a>
-            <a href="#management">ADMIN PANEL</a>
-        </div>
+        <a href="#home">HOME</a>
+        <a href="#games">GAMES</a>
+        <a href="#auth">MANAGEMENT</a>
     </nav>
 
-    <canvas id="roadCanvas"></canvas>
+    <section id="games">
+        <canvas id="warpCanvas"></canvas>
+        <canvas id="roadCanvas"></canvas>
+        <div class="content"><h2>Small Team. Vast Worlds.</h2><p>Code. Tell. Touch.</p></div>
+    </section>
 
-    <div id="omnira-ui">
-        <h2 style="color:#41bbff; font-family:'Orbitron';">SYSTEM CONTROL</h2>
-        
-        <div id="login-block">
-            <input id="email" class="input-box" placeholder="ID / E-mail">
-            <input id="pass" type="password" class="input-box" placeholder="Password">
-            <button class="btn" onclick="login()">SİSTEME GİRİŞ YAP</button>
+    <section id="auth">
+        <div class="auth-box">
+            {% if not current_user.is_authenticated %}
+            <form action="/login" method="POST"><input name="username" placeholder="User"><input type="password" name="password" placeholder="Pass"><button>LOGIN</button></form>
+            {% else %}
+            <h3>Logged as: {{ current_user.username }}</h3>
+            <a href="/logout">Logout</a>
+            {% endif %}
         </div>
-
-        <div id="panel-block" style="display:none;">
-            <div id="chat-box" style="height:350px; background:#000; margin-bottom:15px; overflow-y:scroll; padding:10px;"></div>
-            <input id="msg" class="input-box" placeholder="Komut yaz...">
-            <button class="btn" onclick="send()">KOMUT GÖNDER</button>
-            <button class="btn" style="background:#e05555; margin-top:10px;" onclick="location.reload()">ÇIKIŞ YAP</button>
-        </div>
-    </div>
+    </section>
 
     <script>
-        // OTOBAN EFEKTİ
-        const canvas = document.getElementById('roadCanvas');
-        const ctx = canvas.getContext('2d');
-        function draw() {
-            ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(0,0,window.innerWidth, window.innerHeight);
-            ctx.strokeStyle = '#41bbff'; ctx.beginPath();
-            ctx.moveTo(window.innerWidth/2, window.innerHeight); ctx.lineTo(window.innerWidth/2 - 400, 0);
-            ctx.moveTo(window.innerWidth/2, window.innerHeight); ctx.lineTo(window.innerWidth/2 + 400, 0);
-            ctx.stroke();
-            requestAnimationFrame(draw);
-        }
-        draw();
+        // Warp Efekti (Parçacıklar)
+        const warpCanvas = document.getElementById('warpCanvas');
+        const warpCtx = warpCanvas.getContext('2d');
+        let w, h, particles = [];
 
-        // OMNIRA YÖNETİM
-        async function login() {
-            document.getElementById('login-block').style.display = 'none';
-            document.getElementById('panel-block').style.display = 'block';
+        function initParticles() {
+            w = warpCanvas.width = window.innerWidth;
+            h = warpCanvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<150; i++) particles.push({x:Math.random()*w, y:Math.random()*h, z:Math.random()*1000, color: Math.random() > 0.5 ? '#41bbff' : '#ff52a3'});
         }
 
-        async function send() {
-            const m = document.getElementById('msg').value;
-            const res = await fetch('/chat', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({messages: [{role: 'user', content: m}]})
+        function drawWarp() {
+            warpCtx.fillStyle = 'rgba(5, 5, 7, 0.1)'; warpCtx.fillRect(0, 0, w, h);
+            particles.forEach(p => {
+                p.z -= 10; if(p.z <= 0) p.z = 1000;
+                let sx = (p.x - w/2) * (1000/p.z) + w/2;
+                let sy = (p.y - h/2) * (1000/p.z) + h/2;
+                warpCtx.fillStyle = p.color; warpCtx.fillRect(sx, sy, 2, 2);
             });
-            const d = await res.json();
-            document.getElementById('chat-box').innerHTML += `<p><b>Siz:</b> ${m}</p><p style="color:#41bbff;"><b>Omnira:</b> ${d.choices[0].message.content}</p>`;
+            requestAnimationFrame(drawWarp);
         }
+
+        // Otoban Efekti (Çizgiler)
+        const roadCanvas = document.getElementById('roadCanvas');
+        const roadCtx = roadCanvas.getContext('2d');
+        let pathPos = 0;
+
+        function drawRoad() {
+            roadCtx.fillStyle = 'rgba(5, 5, 7, 0.05)'; roadCtx.fillRect(0, 0, w, h);
+            pathPos += 8; if(pathPos > 100) pathPos = 0;
+            drawLane(w/2 - 150, '#ff52a3'); 
+            drawLane(w/2 + 150, '#41bbff');
+            requestAnimationFrame(drawRoad);
+        }
+
+        function drawLane(x, color) {
+            roadCtx.beginPath(); roadCtx.strokeStyle = color; roadCtx.lineWidth = 4;
+            for(let i=0; i<10; i++) {
+                let y = (i * 100 + pathPos) % h;
+                roadCtx.moveTo(x, y); roadCtx.lineTo(x, y + 50);
+            }
+            roadCtx.stroke();
+        }
+
+        window.addEventListener('resize', initParticles);
+        initParticles();
+        drawWarp();
+        drawRoad();
     </script>
 </body>
 </html>
