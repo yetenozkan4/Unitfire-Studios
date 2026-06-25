@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Uygulama Başlatma
 app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'unitfire_secret_2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///unitfire.db'
@@ -14,14 +13,12 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'home'
 
-# Kullanıcı Modeli
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     role = db.Column(db.String(50), default='Üye')
 
-# Admin Yardımcıları
 def get_admin(id, name, pwd):
     u = User(id=id, username=name, role="Administrator")
     u.password = generate_password_hash(pwd)
@@ -33,36 +30,28 @@ def load_user(user_id):
     if user_id == "9992": return get_admin(9992, "admin2", "UnitfireAdmin2!")
     return User.query.get(int(user_id))
 
-# --- ROUTE'LAR ---
 @app.route('/')
 def home():
-    # Sadece yetkili kullanıcılar tüm listeyi görür
     users = User.query.all() if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] else []
     return render_template('index.html', all_users=users)
 
 @app.route('/login', methods=['POST'])
 def login():
     u, p = request.form.get('username'), request.form.get('password')
-    # Admin kontrolü
-    if u == "admin1" and p == "UnitfireAdmin1!":
-        login_user(get_admin(9991, u, p))
-    elif u == "admin2" and p == "UnitfireAdmin2!":
-        login_user(get_admin(9992, u, p))
+    # Admin girişleri
+    if u == "admin1" and p == "UnitfireAdmin1!": login_user(get_admin(9991, u, p))
+    elif u == "admin2" and p == "UnitfireAdmin2!": login_user(get_admin(9992, u, p))
     else:
-        # Normal kullanıcı kontrolü
+        # Kayıt veya giriş denemesi (Basit mantık: Varsa giriş yap, yoksa yeni kayıt oluştur)
         user = User.query.filter_by(username=u).first()
-        if user and check_password_hash(user.password, p):
-            login_user(user)
-    return redirect(url_for('home'))
-
-@app.route('/register', methods=['POST'])
-def register():
-    u, p = request.form.get('username'), request.form.get('password')
-    if not User.query.filter_by(username=u).first() and u not in ["admin1", "admin2"]:
-        new_user = User(username=u, password=generate_password_hash(p), role='Üye')
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user)
+        if user:
+            if check_password_hash(user.password, p): login_user(user)
+        else:
+            # Kullanıcı yoksa otomatik kayıt
+            new_user = User(username=u, password=generate_password_hash(p), role='Üye')
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
     return redirect(url_for('home'))
 
 @app.route('/update_role', methods=['POST'])
@@ -83,6 +72,5 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    # Render ve Yerel için port yapılandırması
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
