@@ -2,51 +2,81 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Unitfire Studios | Yönetim</title>
+    <title>Unitfire Studios // GLOBAL CONNECT</title>
     <style>
-        body { background:#050507; color:#fff; font-family:sans-serif; margin:0; }
-        nav { padding:40px; display:flex; gap:20px; }
-        .canvas-area { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
-        .panel { background:#111; padding:20px; border:1px solid #41bbff; margin:20px; }
-        input, button, select { padding:10px; background:#000; color:#fff; border:1px solid #333; }
+        body, html { margin:0; padding:0; background:#050507; color:#fff; font-family:sans-serif; overflow-x:hidden; }
+        
+        /* Eski Tasarım Menüsü */
+        nav { position:fixed; top:40px; left:40px; z-index:999; display:flex; gap:30px; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px; }
+        nav a { color:#555; text-decoration:none; transition:0.3s; }
+        nav a:hover { color:#fff; }
+        
+        /* Eski Tasarım Otoban */
+        #roadCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+        
+        /* Yönetim Paneli (Gizli/Admin özel) */
+        .admin-panel { background:#111; color:#fff; padding:20px; border-top:2px solid #41bbff; margin-top:100vh; }
+        input, select { background:#000; color:#fff; border:1px solid #333; padding:5px; }
     </style>
 </head>
 <body>
+
     <nav>
+        <a href="/">HOME</a>
         {% if not current_user.is_authenticated %}
-        <form action="/login" method="POST"><input name="username" placeholder="User"><input type="password" name="password" placeholder="Pass"><button>LOGIN</button></form>
-        <form action="/register" method="POST"><input name="username" placeholder="New User"><input type="password" name="password" placeholder="Pass"><button>REGISTER</button></form>
+        <form action="/login" method="POST" style="display:flex; gap:10px;">
+            <input name="username" placeholder="ID">
+            <input type="password" name="password" placeholder="PASS">
+            <button>GİRİŞ</button>
+        </form>
         {% else %}
-        <span>Logged: {{ current_user.username }} ({{ current_user.role }})</span>
-        <a href="/logout" style="color:#fff;">LOGOUT</a>
+        <a href="/logout">ÇIKIŞ ({{ current_user.username }})</a>
         {% endif %}
     </nav>
-    <canvas id="roadCanvas" class="canvas-area"></canvas>
+
+    <canvas id="roadCanvas"></canvas>
+
     {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
-    <div class="panel">
-        <h2>YÖNETİCİ PANELİ</h2>
+    <div class="admin-panel">
+        <h2>YÖNETİM PANELİ</h2>
         {% for u in all_users %}
-        <form action="/update_role" method="POST" style="margin-bottom:5px;">
-            <input type="hidden" name="user_id" value="{{ u.id }}">
-            {{ u.username }} - <b>{{ u.role }}</b>
-            <select name="role" onchange="this.form.submit()">
-                <option value="Üye" {% if u.role=='Üye' %}selected{% endif %}>Üye</option>
-                <option value="Yetkili" {% if u.role=='Yetkili' %}selected{% endif %}>Yetkili</option>
-                <option value="Yönetici" {% if u.role=='Yönetici' %}selected{% endif %}>Yönetici</option>
-            </select>
-        </form>
+        <div style="margin-bottom:10px;">
+            {{ u.username }} [{{ u.role }}]
+            <form action="/update_role" method="POST" style="display:inline;">
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <select name="role" onchange="this.form.submit()">
+                    <option value="Üye">Üye</option>
+                    <option value="Yetkili">Yetkili</option>
+                    <option value="Yönetici">Yönetici</option>
+                </select>
+            </form>
+        </div>
         {% endfor %}
     </div>
     {% endif %}
+
     <script>
-        const c = document.getElementById('roadCanvas'), ctx = c.getContext('2d');
-        let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
+        const canvas = document.getElementById('roadCanvas');
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+        let pathPos = 0;
+
         function draw() {
-            ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle = '#41bbff'; ctx.beginPath();
-            ctx.moveTo(w/2, h); ctx.lineTo(w/2 - 300, 0);
-            ctx.moveTo(w/2, h); ctx.lineTo(w/2 + 300, 0);
-            ctx.stroke(); requestAnimationFrame(draw);
+            ctx.fillStyle = 'rgba(5, 5, 7, 0.15)'; ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle = '#41bbff'; ctx.lineWidth = 4;
+            pathPos += 8; if(pathPos > 100) pathPos = 0;
+            
+            // Otoban Çizgileri
+            for(let x of [w/2-150, w/2+150]) {
+                ctx.beginPath();
+                for(let i=0; i<10; i++) {
+                    let y = (i * 100 + pathPos) % h;
+                    ctx.moveTo(x, y); ctx.lineTo(x, y + 50);
+                }
+                ctx.stroke();
+            }
+            requestAnimationFrame(draw);
         }
         draw();
     </script>
