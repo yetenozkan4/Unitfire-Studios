@@ -2,88 +2,116 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Unitfire Studios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unitfire Studios | Yönetim ve Proje Portalı</title>
     <style>
-        body, html { margin:0; padding:0; background:#050507; color:#fff; font-family:-apple-system, sans-serif; overflow:hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #0b0b0b; color: #8a8a8a; line-height: 1.7; padding: 60px 40px; -webkit-font-smoothing: antialiased; }
+        .container { max-width: 1000px; margin: 0 auto; }
         
-        /* Minimalist Nav */
-        nav { position:fixed; top:40px; width:100%; display:flex; justify-content:center; gap:40px; z-index:999; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px; }
-        nav a { color:#555; text-decoration:none; transition:0.3s; } nav a:hover { color:#fff; }
+        /* Navigasyon */
+        nav { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 120px; }
+        .logo { font-size: 1.1rem; font-weight: 600; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase; }
+        .nav-menu { display: flex; gap: 30px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-menu a, .auth-trigger { color: #555; text-decoration: none; cursor: pointer; transition: color 0.3s; }
+        .nav-menu a:hover, .auth-trigger:hover { color: #fff; }
+
+        /* İçerik */
+        .hero { margin-bottom: 100px; max-width: 750px; }
+        .hero h1 { font-size: 2.2rem; font-weight: 400; color: #ffffff; line-height: 1.4; margin-bottom: 25px; }
+        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-bottom: 40px; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px; font-weight: 600; }
+        .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-bottom: 100px; }
         
-        /* Canvaslar (Arkaplan) */
-        canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+        /* Auth ve Panel */
+        .auth-panel { display: none; background: #111; border: 1px solid #1a1a1a; padding: 30px; margin-bottom: 60px; max-width: 450px; }
+        .btn-submit { background: #fff; color: #000; border: none; padding: 10px 20px; font-size: 0.85rem; text-transform: uppercase; cursor: pointer; width: 100%; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; font-weight: bold; }
+        .alert-success { background-color: #1b5e20; color: #e8f5e9; }
+        .alert-danger { background-color: #b71c1c; color: #ffebee; }
         
-        /* Tek Giriş Kutusu */
-        .auth-container { position:fixed; bottom:50px; left:50%; transform:translateX(-50%); z-index:100; text-align:center; }
-        .auth-box { display:flex; gap:10px; background:rgba(0,0,0,0.5); padding:15px; border:1px solid #222; }
-        input { background:transparent; border:1px solid #333; color:#fff; padding:5px 10px; }
-        button { background:#fff; color:#000; border:none; padding:5px 15px; cursor:pointer; font-weight:bold; }
-        
-        /* Admin Panel */
-        .admin-panel { position:fixed; top:100px; left:50px; background:#0a0a0c; padding:20px; border:1px solid #41bbff; color:#fff; font-size:0.8rem; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+        .admin-table th, .admin-table td { text-align: left; padding: 10px; border-bottom: 1px solid #1a1a1a; color: #fff; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <nav>
-        <a href="#home">HOME</a>
-        <a href="#games">GAMES</a>
-        <a href="#support">SUPPORT</a>
+        <div class="logo">Unitfire Studios</div>
+        <div class="nav-menu">
+            <a href="#">Games</a>
+            <a href="#">Assets</a>
+            {% if not current_user.is_authenticated %}
+                <span class="auth-trigger" onclick="toggleAuth('login-box')">Login</span>
+                <span class="auth-trigger" onclick="toggleAuth('register-box')">Register</span>
+            {% else %}
+                <span style="color: #fff;">{{ current_user.username }} ({{ current_user.role }})</span>
+                <a href="/logout">Logout</a>
+            {% endif %}
+        </div>
     </nav>
 
-    <canvas id="warpCanvas"></canvas>
-    <canvas id="roadCanvas"></canvas>
-
-    <div class="auth-container">
-        {% if not current_user.is_authenticated %}
-        <form action="/login" method="POST" class="auth-box">
-            <input name="username" placeholder="Username">
-            <input type="password" name="password" placeholder="Pass">
-            <button type="submit">GİRİŞ / KAYIT</button>
-        </form>
-        {% else %}
-        <div class="auth-box">
-            <span>{{ current_user.username }}</span>
-            <a href="/logout" style="color:#ff52a3;">ÇIKIŞ</a>
-        </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
         {% endif %}
+    {% endwith %}
+
+    <div id="login-box" class="auth-panel">
+        <h2>Kullanıcı Girişi</h2>
+        <form action="/login" method="POST">
+            <div style="margin-bottom:15px;"><input type="text" name="username" placeholder="Kullanıcı Adı" style="width:100%; padding:10px;" required></div>
+            <div style="margin-bottom:15px;"><input type="password" name="password" placeholder="Şifre" style="width:100%; padding:10px;" required></div>
+            <button type="submit" class="btn-submit">Giriş Yap</button>
+        </form>
+    </div>
+
+    <div id="register-box" class="auth-panel">
+        <h2>Yeni Hesap</h2>
+        <form action="/register" method="POST">
+            <div style="margin-bottom:15px;"><input type="text" name="username" placeholder="Kullanıcı Adı" style="width:100%; padding:10px;" required></div>
+            <div style="margin-bottom:15px;"><input type="password" name="password" placeholder="Şifre" style="width:100%; padding:10px;" required></div>
+            <button type="submit" class="btn-submit">Kayıt Ol</button>
+        </form>
+    </div>
+
+    <div class="hero">
+        <h1>We weave mechanics with emotions and systems with themes.</h1>
+        <p>Küçük bir ekip, devasa dünyalar. Unitfire Studios geri dönüyor.</p>
     </div>
 
     {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
-    <div class="admin-panel">
-        <h4>YÖNETİM</h4>
-        {% for u in all_users %}
-        <div style="margin-bottom:5px;">{{ u.username }} 
-            <form action="/update_role" method="POST" style="display:inline;">
-                <input type="hidden" name="user_id" value="{{ u.id }}">
-                <select name="role" onchange="this.form.submit()">
-                    <option value="Üye" {% if u.role=='Üye' %}selected{% endif %}>Üye</option>
-                    <option value="Yönetici" {% if u.role=='Yönetici' %}selected{% endif %}>Yönetici</option>
-                </select>
-            </form>
-        </div>
-        {% endfor %}
+    <h2 class="section-title">Yönetim Paneli</h2>
+    <div style="background: #111; padding: 30px; border: 1px solid #1a1a1a; margin-bottom: 60px;">
+        <form action="/update_role" method="POST" style="display: flex; gap: 15px; margin-bottom: 30px;">
+            <input type="number" name="user_id" placeholder="ID" style="padding: 10px; width: 100px;" required>
+            <select name="role" style="padding: 10px;">
+                <option value="Üye">Üye</option>
+                <option value="Yönetici">Yönetici</option>
+            </select>
+            <button type="submit" class="btn-submit" style="width: 100px;">Ata</button>
+        </form>
+        <table class="admin-table">
+            <thead><tr><th>ID</th><th>Kullanıcı</th><th>Rol</th></tr></thead>
+            <tbody>
+                {% for u in all_users %}
+                <tr><td>{{ u.id }}</td><td>{{ u.username }}</td><td>{{ u.role }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% endif %}
+</div>
 
-    <script>
-        // Arkaplan efektlerini çalıştıran script aynı kalacak
-        const wC = document.getElementById('warpCanvas'), wCtx = wC.getContext('2d');
-        const rC = document.getElementById('roadCanvas'), rCtx = rC.getContext('2d');
-        let w = wC.width = rC.width = window.innerWidth;
-        let h = wC.height = rC.height = window.innerHeight;
-
-        function animate() {
-            wCtx.fillStyle = 'rgba(5,5,7,0.1)'; wCtx.fillRect(0,0,w,h);
-            rCtx.fillStyle = 'rgba(5,5,7,0.05)'; rCtx.fillRect(0,0,w,h);
-            // Otoban Çizimi
-            rCtx.strokeStyle = '#41bbff'; rCtx.lineWidth = 2;
-            [w/2-150, w/2+150].forEach(x => {
-                rCtx.beginPath(); rCtx.moveTo(x, 0); rCtx.lineTo(x, h); rCtx.stroke();
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-    </script>
+<script>
+    function toggleAuth(boxId) {
+        document.getElementById('login-box').style.display = "none";
+        document.getElementById('register-box').style.display = "none";
+        var box = document.getElementById(boxId);
+        box.style.display = (box.style.display === "block") ? "none" : "block";
+    }
+</script>
 </body>
 </html>
