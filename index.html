@@ -4,18 +4,23 @@
     <meta charset="UTF-8">
     <title>Unitfire Studios</title>
     <style>
-        body, html { margin:0; padding:0; background:#050507; color:#fff; font-family:-apple-system, sans-serif; overflow-x:hidden; }
-        nav { position:fixed; top:40px; left:40px; z-index:999; display:flex; gap:30px; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px; }
+        body, html { margin:0; padding:0; background:#050507; color:#fff; font-family:-apple-system, sans-serif; overflow:hidden; }
+        
+        /* Minimalist Nav */
+        nav { position:fixed; top:40px; width:100%; display:flex; justify-content:center; gap:40px; z-index:999; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px; }
         nav a { color:#555; text-decoration:none; transition:0.3s; } nav a:hover { color:#fff; }
         
-        section { height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; }
-        canvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
+        /* Canvaslar (Arkaplan) */
+        canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
         
-        .content, .auth-box, .admin-panel { position:relative; z-index:10; text-align:center; }
-        .auth-box { background:#0a0a0c; padding:40px; border:1px solid #1a1a1a; width:300px; }
-        input, button, select { width:100%; padding:10px; margin:5px 0; background:#000; border:1px solid #333; color:#fff; }
-        button { cursor:pointer; background:#fff; color:#000; font-weight:bold; }
-        .admin-panel { background:#111; padding:20px; border:1px solid #41bbff; width:80%; margin-top:20px; }
+        /* Tek Giriş Kutusu */
+        .auth-container { position:fixed; bottom:50px; left:50%; transform:translateX(-50%); z-index:100; text-align:center; }
+        .auth-box { display:flex; gap:10px; background:rgba(0,0,0,0.5); padding:15px; border:1px solid #222; }
+        input { background:transparent; border:1px solid #333; color:#fff; padding:5px 10px; }
+        button { background:#fff; color:#000; border:none; padding:5px 15px; cursor:pointer; font-weight:bold; }
+        
+        /* Admin Panel */
+        .admin-panel { position:fixed; top:100px; left:50px; background:#0a0a0c; padding:20px; border:1px solid #41bbff; color:#fff; font-size:0.8rem; }
     </style>
 </head>
 <body>
@@ -23,78 +28,62 @@
     <nav>
         <a href="#home">HOME</a>
         <a href="#games">GAMES</a>
-        <a href="#auth">ACCOUNT</a>
+        <a href="#support">SUPPORT</a>
     </nav>
 
-    <section id="games">
-        <canvas id="warpCanvas"></canvas>
-        <canvas id="roadCanvas"></canvas>
-        <div class="content"><h1>UNITFIRE</h1><p>Code. Tell. Touch.</p></div>
-    </section>
+    <canvas id="warpCanvas"></canvas>
+    <canvas id="roadCanvas"></canvas>
 
-    <section id="auth">
+    <div class="auth-container">
+        {% if not current_user.is_authenticated %}
+        <form action="/login" method="POST" class="auth-box">
+            <input name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Pass">
+            <button type="submit">GİRİŞ / KAYIT</button>
+        </form>
+        {% else %}
         <div class="auth-box">
-            {% if not current_user.is_authenticated %}
-            <form action="/login" method="POST"><input name="username" placeholder="Username"><input type="password" name="password" placeholder="Pass"><button>LOGIN</button></form>
-            <form action="/register" method="POST"><input name="username" placeholder="New User"><input type="password" name="password" placeholder="Pass"><button>REGISTER</button></form>
-            {% else %}
-            <h3>Logged as: {{ current_user.username }} ({{ current_user.role }})</h3>
-            <a href="/logout" style="color:red;">LOGOUT</a>
-            {% endif %}
-        </div>
-
-        {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
-        <div class="admin-panel">
-            <h2>YÖNETİM PANELİ</h2>
-            {% for u in all_users %}
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                {{ u.username }} ({{ u.role }})
-                <form action="/update_role" method="POST">
-                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                    <select name="role" onchange="this.form.submit()">
-                        <option value="Üye" {% if u.role=='Üye' %}selected{% endif %}>Üye</option>
-                        <option value="Yetkili" {% if u.role=='Yetkili' %}selected{% endif %}>Yetkili</option>
-                        <option value="Yönetici" {% if u.role=='Yönetici' %}selected{% endif %}>Yönetici</option>
-                    </select>
-                </form>
-            </div>
-            {% endfor %}
+            <span>{{ current_user.username }}</span>
+            <a href="/logout" style="color:#ff52a3;">ÇIKIŞ</a>
         </div>
         {% endif %}
-    </section>
+    </div>
+
+    {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
+    <div class="admin-panel">
+        <h4>YÖNETİM</h4>
+        {% for u in all_users %}
+        <div style="margin-bottom:5px;">{{ u.username }} 
+            <form action="/update_role" method="POST" style="display:inline;">
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <select name="role" onchange="this.form.submit()">
+                    <option value="Üye" {% if u.role=='Üye' %}selected{% endif %}>Üye</option>
+                    <option value="Yönetici" {% if u.role=='Yönetici' %}selected{% endif %}>Yönetici</option>
+                </select>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <script>
-        // Warp Efekti
+        // Arkaplan efektlerini çalıştıran script aynı kalacak
         const wC = document.getElementById('warpCanvas'), wCtx = wC.getContext('2d');
-        let w = wC.width = window.innerWidth, h = wC.height = window.innerHeight;
-        let particles = Array.from({length:150}, () => ({x:Math.random()*w, y:Math.random()*h, z:Math.random()*1000}));
-        
-        function drawWarp() {
-            wCtx.fillStyle = 'rgba(5,5,7,0.1)'; wCtx.fillRect(0,0,w,h);
-            particles.forEach(p => {
-                p.z -= 10; if(p.z <= 0) p.z = 1000;
-                wCtx.fillStyle = '#41bbff'; wCtx.fillRect((p.x - w/2)*(1000/p.z) + w/2, (p.y - h/2)*(1000/p.z) + h/2, 2, 2);
-            });
-            requestAnimationFrame(drawWarp);
-        }
-
-        // Otoban Efekti
         const rC = document.getElementById('roadCanvas'), rCtx = rC.getContext('2d');
-        let pathPos = 0;
-        function drawRoad() {
+        let w = wC.width = rC.width = window.innerWidth;
+        let h = wC.height = rC.height = window.innerHeight;
+
+        function animate() {
+            wCtx.fillStyle = 'rgba(5,5,7,0.1)'; wCtx.fillRect(0,0,w,h);
             rCtx.fillStyle = 'rgba(5,5,7,0.05)'; rCtx.fillRect(0,0,w,h);
-            pathPos += 8; if(pathPos > 100) pathPos = 0;
+            // Otoban Çizimi
+            rCtx.strokeStyle = '#41bbff'; rCtx.lineWidth = 2;
             [w/2-150, w/2+150].forEach(x => {
-                rCtx.beginPath(); rCtx.strokeStyle = '#ff52a3';
-                for(let i=0; i<10; i++) {
-                    let y = (i * 100 + pathPos) % h;
-                    rCtx.moveTo(x, y); rCtx.lineTo(x, y + 50);
-                }
-                rCtx.stroke();
+                rCtx.beginPath(); rCtx.moveTo(x, 0); rCtx.lineTo(x, h); rCtx.stroke();
             });
-            requestAnimationFrame(drawRoad);
+            requestAnimationFrame(animate);
         }
-        drawWarp(); drawRoad();
+        animate();
     </script>
 </body>
 </html>
