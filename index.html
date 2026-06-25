@@ -5,261 +5,318 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unitfire Studios</title>
     <style>
-        /* Bluerain Tam Ekran Sinematik CSS Düzeni */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Times New Roman', Times, serif; /* Sloganın o asil font havası için */
         }
 
-        body, html {
-            height: 100%;
+        html {
+            scroll-behavior: smooth; /* Menüye basınca aşağı pürüzsüz kayması için */
+        }
+
+        body {
             background-color: #050507;
             color: #ffffff;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Arka plandaki o çok hafif uzay/toz bulutu atmosferi */
-        .wrapper {
-            height: 100%;
+        /* Sabit Sol Üst Menü (Bluerain Stili) */
+        nav {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            z-index: 100;
+            display: flex;
+            gap: 25px;
+        }
+
+        nav a {
+            color: #525866;
+            text-decoration: none;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+        }
+
+        /* Bölüm Ortak Ayarları */
+        section {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 40px 20px;
-            background: radial-gradient(circle at center, rgba(15, 22, 38, 0.2) 0%, rgba(5, 5, 7, 1) 80%);
+            padding: 80px 40px;
             position: relative;
         }
 
-        /* 1. Üst Kısım: Sadece Merkezdeki Yuvarlak Logo */
-        header {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
+        /* 1. ANA EKRAN (HERO) */
+        #home {
+            background: radial-gradient(circle at center, rgba(15, 22, 38, 0.15) 0%, rgba(5, 5, 7, 1) 85%);
         }
 
         .studio-logo {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 45px;
+            height: 45px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-            font-family: -apple-system, sans-serif;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
+            font-size: 0.75rem;
             font-weight: bold;
             color: #41bbff;
+            background: #0f1015;
         }
 
-        /* 2. Orta Kısım: Sinematik Slogan ve İki Buton */
-        .main-content {
+        .hero-content {
             text-align: center;
             max-width: 800px;
-            z-index: 5;
-            transform: translateY(-20px);
         }
 
-        .sub-tag {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            font-size: 0.75rem;
+        .hero-content h1 {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 4rem;
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-content p {
+            font-size: 1.05rem;
+            color: #525866;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        /* 2. GAMES (OYUNLAR) BÖLÜMÜ */
+        #games {
+            background-color: #08080a;
+            align-items: flex-start;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            color: #444854;
-            margin-bottom: 15px;
+            letter-spacing: 2px;
+            color: #3a3f4d;
+            margin-bottom: 50px;
+            border-bottom: 1px solid #14161d;
+            width: 100%;
+            padding-bottom: 10px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; gap: 40px; } }
+
+        .game-card h3 {
+            font-size: 1.3rem;
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .game-card p {
+            font-size: 0.95rem;
+            color: #525866;
+            line-height: 1.6;
+        }
+
+        .game-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #3a3f4d;
+            margin-top: 15px;
             display: block;
         }
 
-        .main-title {
-            font-size: 3.8rem;
-            font-weight: 400;
-            line-height: 1.2;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-            margin-bottom: 20px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        /* 3. MANAGEMENT (YÖNETİM & AUTH) BÖLÜMÜ */
+        #management {
+            background-color: #050507;
+            align-items: flex-start;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .main-desc {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            font-size: 1rem;
-            color: #525866;
-            font-weight: 300;
-            margin-bottom: 35px;
-            letter-spacing: 0.5px;
+        .auth-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+            margin-bottom: 50px;
         }
 
-        /* Yan yana duran o iki özel buton */
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
+        @media (max-width: 768px) { .auth-grid { grid-template-columns: 1fr; } }
 
-        .btn-main {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            padding: 12px 28px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            text-decoration: none;
+        .auth-box {
+            background: #0f1015;
+            border: 1px solid #14161d;
+            padding: 30px;
             border-radius: 4px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            letter-spacing: 0.5px;
         }
 
-        /* Ekran görüntüsündeki açık mavi/turkuaz dolgulu buton */
-        .btn-filled {
-            background-color: #8ae4ff;
+        .auth-box h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #fff;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #050507;
+            border: 1px solid #1c1e24;
+            color: #fff;
+            border-radius: 4px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+        .form-group input:focus { border-color: #41bbff; }
+
+        .btn-action {
+            background: #ffffff;
             color: #050507;
             border: none;
-        }
-        .btn-filled:hover {
-            background-color: #b3eeff;
-            box-shadow: 0 0 20px rgba(138, 228, 255, 0.4);
-        }
-
-        /* Yanındaki içi boş, transparan buton */
-        .btn-outline {
-            background-color: transparent;
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .btn-outline:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Alt Kısım: Gizli Giriş Tetikleyicisi */
-        footer {
-            font-family: -apple-system, sans-serif;
-            font-size: 0.75rem;
-            color: #22252d;
-            letter-spacing: 1px;
-            z-index: 10;
-        }
-        .admin-trigger {
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .admin-trigger:hover { color: #525866; }
-
-        /* Arka Planda Açılan Gizli Modern Giriş Paneli */
-        .overlay-panel {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 7, 0.95);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            font-family: -apple-system, sans-serif;
-        }
-        .panel-box {
-            background: #0f1015;
-            border: 1px solid #1e202b;
-            padding: 40px;
+            padding: 12px;
             width: 100%;
-            max-width: 400px;
-            border-radius: 6px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s;
         }
-        .panel-box h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; color: #fff; font-weight: 500; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        .form-group input { width: 100%; padding: 12px; background: #050507; border: 1px solid #1e202b; color: #fff; border-radius: 4px; outline: none; }
-        .form-group input:focus { border-color: #41bbff; }
-        .close-btn { text-align: center; margin-top: 15px; color: #525866; cursor: pointer; font-size: 0.85rem; }
-        .close-btn:hover { color: #fff; }
+        .btn-action:hover { background: #dcdcdc; }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        .admin-table th, .admin-table td { text-align: left; padding: 12px; border-bottom: 1px solid #14161d; }
+        .admin-table th { color: #525866; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-    <div class="wrapper">
-        <header>
-            <div class="studio-logo">UF</div>
-        </header>
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#games">Games</a>
+        <a href="#management">Management</a>
+    </nav>
 
-        <main class="main-content">
-            <span class="sub-tag">Unitfire Studios // Geri Dönüş</span>
-            <h1 class="main-title">Every Pixel<br>Tells a Story</h1>
-            <p class="main-desc">We weave mechanics with emotions. You are the story.</p>
-            
-            <div class="btn-container">
-                {% if not current_user.is_authenticated %}
-                    <div class="btn-main btn-filled" onclick="openPanel('login-overlay')">Explore the Studio</div>
-                    <div class="btn-main btn-outline" onclick="openPanel('register-overlay')">Join the Core</div>
-                {% else %}
-                    <div class="btn-main btn-filled">{{ current_user.username }} ({{ current_user.role }})</div>
-                    <a href="/logout" class="btn-main btn-outline">System Logout</a>
-                {% endif %}
+    <div class="studio-logo">UF</div>
+
+    <section id="home">
+        <div class="hero-content">
+            <h1>Every Pixel<br>Tells a Story</h1>
+            <p>We weave mechanics with emotions. Unitfire Studios returns to shape digital universes.</p>
+        </div>
+    </section>
+
+    <section id="games">
+        <h2 class="section-title">Our Universes</h2>
+        <div class="grid-container">
+            <div class="game-card">
+                <h3>Blindcam</h3>
+                <p>Zifiri karanlık koridorlar, el fenerinin titreyen ışığı ve telsiz parazitleri. Saf atmosferik gerilim deneyimi.</p>
+                <span class="game-tag">// Pre-release development</span>
             </div>
-        </main>
-
-        <footer>
-            <span class="admin-trigger" onclick="openPanel('admin-overlay')">// unitfire.sys</span>
-        </footer>
-    </div>
-
-    <div id="login-overlay" class="overlay-panel">
-        <div class="panel-box">
-            <h2>Giriş Paneli</h2>
-            <form action="/login" method="POST">
-                <div class="form-group"><input type="text" name="username" placeholder="Kullanıcı Adı" required></div>
-                <div class="form-group"><input type="password" name="password" placeholder="Şifre" required></div>
-                <button type="submit" class="btn-main btn-filled" style="width: 100%;">Sisteme Bağlan</button>
-            </form>
-            <div class="close-btn" onclick="closePanels()">[ Kapat ]</div>
+            <div class="game-card">
+                <h3>Virus Extreme</h3>
+                <p>DNA mutasyon mimarisi ve küresel yayılım algoritmaları üzerine kurulu derin bir strateji simülasyonu.</p>
+                <span class="game-tag">// Planning stage</span>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div id="register-overlay" class="overlay-panel">
-        <div class="panel-box">
-            <h2>Yeni Çekirdek Kaydı</h2>
-            <form action="/register" method="POST">
-                <div class="form-group"><input type="text" name="username" placeholder="Kullanıcı Adı Belirleyin" required></div>
-                <div class="form-group"><input type="password" name="password" placeholder="Şifre Belirleyin" required></div>
-                <button type="submit" class="btn-main btn-filled" style="width: 100%;">Hesap Oluştur</button>
-            </form>
-            <div class="close-btn" onclick="closePanels()">[ Kapat ]</div>
-        </div>
-    </div>
-
-    <div id="admin-overlay" class="overlay-panel">
-        <div class="panel-box" style="max-width: 500px;">
-            <h2>Studio Admin Core</h2>
-            {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
-                <form action="/update_role" method="POST" style="margin-bottom: 20px;">
-                    <div class="form-group"><input type="number" name="user_id" placeholder="Kullanıcı ID" required></div>
-                    <div class="form-group">
-                        <select name="role" style="width: 100%; padding: 12px; background: #050507; border: 1px solid #1e202b; color: #fff; border-radius: 4px;">
-                            <option value="Üye">Üye</option>
-                            <option value="Yetkili">Yetkili</option>
-                            <option value="Üst Yetkili">Üst Yetkili</option>
-                            <option value="Yönetici">Yönetici</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-main btn-filled" style="width: 100%;">Rolü Güncelle</button>
-                </form>
+    <section id="management">
+        <h2 class="section-title">Studio System Core</h2>
+        
+        <div class="auth-grid">
+            {% if not current_user.is_authenticated %}
+                <div class="auth-box">
+                    <h3>System Login</h3>
+                    <form action="/login" method="POST">
+                        <div class="form-group"><input type="text" name="username" placeholder="Kullanıcı Adı" required></div>
+                        <div class="form-group"><input type="password" name="password" placeholder="Şifre" required></div>
+                        <button type="submit" class="btn-action">Bağlan</button>
+                    </form>
+                </div>
+                <div class="auth-box">
+                    <h3>Create Core Account</h3>
+                    <form action="/register" method="POST">
+                        <div class="form-group"><input type="text" name="username" placeholder="Kullanıcı Adı Belirleyin" required></div>
+                        <div class="form-group"><input type="password" name="password" placeholder="Şifre Belirleyin" required></div>
+                        <button type="submit" class="btn-action" style="background: #41bbff; color: #000;">Kayıt Ol</button>
+                    </form>
+                </div>
             {% else %}
-                <p style="color: #525866; text-align: center; margin-bottom: 20px;">Bu konsola erişim yetkiniz bulunmuyor.</p>
+                <div class="auth-box" style="grid-column: span 2;">
+                    <h3>Sistem Oturumu Açık: {{ current_user.username }}</h3>
+                    <p style="color: #525866; margin-bottom: 15px;">Mevcut Yetki Rütbeniz: <strong style="color: #fff;">{{ current_user.role }}</strong></p>
+                    <a href="/logout" class="btn-action" style="background: #ff3838; color: #fff; text-decoration: none; display: inline-block; text-align: center; width: auto; padding: 10px 25px;">Oturumu Kapat</a>
+                </div>
             {% endif %}
-            <div class="close-btn" onclick="closePanels()">[ Konsoldan Çık ]</div>
         </div>
-    </div>
 
-    <script>
-        function openPanel(id) { document.getElementById(id).style.display = 'flex'; }
-        function closePanels() { 
-            document.getElementById('login-overlay').style.display = 'none'; 
-            document.getElementById('register-overlay').style.display = 'none'; 
-            document.getElementById('admin-overlay').style.display = 'none'; 
-        }
-    </script>
+        {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
+        <div class="auth-box" style="width: 100%;">
+            <h3>Rütbe Yetkilendirme Konsolu</h3>
+            <form action="/update_role" method="POST" style="display: flex; gap: 15px; margin-bottom: 25px;">
+                <input type="number" name="user_id" placeholder="Kullanıcı ID" style="padding: 12px; background: #050507; border: 1px solid #1c1e24; color: #fff; width: 150px; border-radius: 4px; outline: none;" required>
+                <select name="role" style="padding: 12px; background: #050507; border: 1px solid #1c1e24; color: #fff; width: 200px; border-radius: 4px; outline: none;">
+                    <option value="Üye">Üye</option>
+                    <option value="Yetkili">Yetkili</option>
+                    <option value="Üst Yetkili">Üst Yetkili</option>
+                    <option value="Yönetici">Yönetici</option>
+                </select>
+                <button type="submit" class="btn-action" style="width: auto; padding: 0 30px;">Ata</button>
+            </form>
+
+            <table class="admin-table">
+                <thead>
+                    <tr><th>ID</th><th>Kullanıcı Adı</th><th>Atanmış Rol</th></tr>
+                </thead>
+                <tbody>
+                    {% for u in all_users %}
+                    <tr>
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.username }}</td>
+                        <td style="color: #fff; font-weight: 500;">{{ u.role }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </section>
+
 </body>
 </html>
