@@ -12,7 +12,7 @@
         }
 
         html {
-            scroll-behavior: smooth; /* Menüye basınca aşağı pürüzsüz kayması için */
+            scroll-behavior: smooth;
         }
 
         body {
@@ -20,9 +20,10 @@
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        /* Sabit Sol Üst Menü (Bluerain Stili) */
+        /* Sabit Sol Üst Menü */
         nav {
             position: fixed;
             top: 40px;
@@ -46,24 +47,8 @@
             color: #ffffff;
         }
 
-        /* Bölüm Ortak Ayarları */
-        section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 80px 40px;
-            position: relative;
-        }
-
-        /* 1. ANA EKRAN (HERO) */
-        #home {
-            background: radial-gradient(circle at center, rgba(15, 22, 38, 0.15) 0%, rgba(5, 5, 7, 1) 85%);
-        }
-
         .studio-logo {
-            position: absolute;
+            position: fixed;
             top: 40px;
             right: 40px;
             width: 45px;
@@ -77,11 +62,29 @@
             font-weight: bold;
             color: #41bbff;
             background: #0f1015;
+            z-index: 100;
+        }
+
+        /* Tüm Bölümler Ekranı Kaplar */
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 40px;
+            position: relative;
+        }
+
+        /* BÖLÜM 1: ANA EKRAN */
+        #home {
+            background: radial-gradient(circle at center, rgba(15, 22, 38, 0.15) 0%, rgba(5, 5, 7, 1) 85%);
         }
 
         .hero-content {
             text-align: center;
             max-width: 800px;
+            z-index: 5;
         }
 
         .hero-content h1 {
@@ -100,9 +103,60 @@
             letter-spacing: 0.5px;
         }
 
-        /* 2. GAMES (OYUNLAR) BÖLÜMÜ */
+        /* BÖLÜM 2: SİNEMATİK AKAN ÇİZGİLER ALANI (GAMES) */
         #games {
-            background-color: #08080a;
+            background-color: #030305;
+            overflow: hidden;
+        }
+
+        /* Arkadaki Canlı Çizgi Efekti */
+        #lineCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Çizgilerin Üstündeki Metin Konteyneri */
+        .cinematic-content {
+            position: relative;
+            z-index: 5;
+            text-align: center;
+            max-width: 700px;
+            background: linear-gradient(rgba(3,3,5,0) 0%, rgba(3,3,5,0.7) 50%, rgba(3,3,5,0) 100%);
+            padding: 40px 20px;
+        }
+
+        .cinematic-title {
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .cinematic-desc {
+            font-size: 1rem;
+            color: #72798a;
+            line-height: 1.8;
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        .cinematic-quote {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-size: 1.3rem;
+            color: #ff52a3; /* Pembe Vurgu */
+            text-shadow: 0 0 15px rgba(255, 82, 163, 0.4);
+        }
+
+        /* BÖLÜM 3: MANAGEMENT (YÖNETİM & AUTH) */
+        #management {
+            background-color: #050507;
             align-items: flex-start;
             max-width: 900px;
             margin: 0 auto;
@@ -117,45 +171,6 @@
             border-bottom: 1px solid #14161d;
             width: 100%;
             padding-bottom: 10px;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            width: 100%;
-        }
-
-        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; gap: 40px; } }
-
-        .game-card h3 {
-            font-size: 1.3rem;
-            color: #ffffff;
-            font-weight: 500;
-            margin-bottom: 12px;
-        }
-
-        .game-card p {
-            font-size: 0.95rem;
-            color: #525866;
-            line-height: 1.6;
-        }
-
-        .game-tag {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #3a3f4d;
-            margin-top: 15px;
-            display: block;
-        }
-
-        /* 3. MANAGEMENT (YÖNETİM & AUTH) BÖLÜMÜ */
-        #management {
-            background-color: #050507;
-            align-items: flex-start;
-            max-width: 900px;
-            margin: 0 auto;
         }
 
         .auth-grid {
@@ -195,7 +210,6 @@
             outline: none;
             font-size: 0.9rem;
         }
-        .form-group input:focus { border-color: #41bbff; }
 
         .btn-action {
             background: #ffffff;
@@ -209,9 +223,7 @@
             font-weight: 600;
             cursor: pointer;
             border-radius: 4px;
-            transition: background 0.3s;
         }
-        .btn-action:hover { background: #dcdcdc; }
 
         .admin-table {
             width: 100%;
@@ -220,7 +232,6 @@
             font-size: 0.9rem;
         }
         .admin-table th, .admin-table td { text-align: left; padding: 12px; border-bottom: 1px solid #14161d; }
-        .admin-table th { color: #525866; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -236,29 +247,24 @@
     <section id="home">
         <div class="hero-content">
             <h1>Every Pixel<br>Tells a Story</h1>
-            <p>We weave mechanics with emotions. Unitfire Studios returns to shape digital universes.</p>
+            <p>Unitfire Studios returns to shape digital universes.</p>
         </div>
     </section>
 
     <section id="games">
-        <h2 class="section-title">Our Universes</h2>
-        <div class="grid-container">
-            <div class="game-card">
-                <h3>Blindcam</h3>
-                <p>Zifiri karanlık koridorlar, el fenerinin titreyen ışığı ve telsiz parazitleri. Saf atmosferik gerilim deneyimi.</p>
-                <span class="game-tag">// Pre-release development</span>
-            </div>
-            <div class="game-card">
-                <h3>Virus Extreme</h3>
-                <p>DNA mutasyon mimarisi ve küresel yayılım algoritmaları üzerine kurulu derin bir strateji simülasyonu.</p>
-                <span class="game-tag">// Planning stage</span>
-            </div>
+        <canvas id="lineCanvas"></canvas>
+
+        <div class="cinematic-content">
+            <h2 class="cinematic-title">Small Team. Vast Worlds.</h2>
+            <p class="cinematic-desc">
+                Biz mekanikleri duygularla, sistemleri temalarla örüyoruz. Geliştirdiğimiz her proje (Blindcam & Virus Extreme), oyuncunun içinde kaybolacağı yeni bir evrenin ilk cümlesidir.
+            </p>
+            <p class="cinematic-quote">"Code. Tell. Touch."</p>
         </div>
     </section>
 
     <section id="management">
         <h2 class="section-title">Studio System Core</h2>
-        
         <div class="auth-grid">
             {% if not current_user.is_authenticated %}
                 <div class="auth-box">
@@ -272,16 +278,16 @@
                 <div class="auth-box">
                     <h3>Create Core Account</h3>
                     <form action="/register" method="POST">
-                        <div class="form-group"><input type="text" name="username" placeholder="Kullanıcı Adı Belirleyin" required></div>
-                        <div class="form-group"><input type="password" name="password" placeholder="Şifre Belirleyin" required></div>
+                        <div class="form-group"><input type="text" name="username" placeholder="Kullanıcı Adı" required></div>
+                        <div class="form-group"><input type="password" name="password" placeholder="Şifre" required></div>
                         <button type="submit" class="btn-action" style="background: #41bbff; color: #000;">Kayıt Ol</button>
                     </form>
                 </div>
             {% else %}
                 <div class="auth-box" style="grid-column: span 2;">
                     <h3>Sistem Oturumu Açık: {{ current_user.username }}</h3>
-                    <p style="color: #525866; margin-bottom: 15px;">Mevcut Yetki Rütbeniz: <strong style="color: #fff;">{{ current_user.role }}</strong></p>
-                    <a href="/logout" class="btn-action" style="background: #ff3838; color: #fff; text-decoration: none; display: inline-block; text-align: center; width: auto; padding: 10px 25px;">Oturumu Kapat</a>
+                    <p style="color: #525866; margin-bottom: 15px;">Rütbeniz: <strong>{{ current_user.role }}</strong></p>
+                    <a href="/logout" class="btn-action" style="background: #ff3838; color: #fff; text-decoration: none; padding: 10px 25px;">Oturumu Kapat</a>
                 </div>
             {% endif %}
         </div>
@@ -290,8 +296,8 @@
         <div class="auth-box" style="width: 100%;">
             <h3>Rütbe Yetkilendirme Konsolu</h3>
             <form action="/update_role" method="POST" style="display: flex; gap: 15px; margin-bottom: 25px;">
-                <input type="number" name="user_id" placeholder="Kullanıcı ID" style="padding: 12px; background: #050507; border: 1px solid #1c1e24; color: #fff; width: 150px; border-radius: 4px; outline: none;" required>
-                <select name="role" style="padding: 12px; background: #050507; border: 1px solid #1c1e24; color: #fff; width: 200px; border-radius: 4px; outline: none;">
+                <input type="number" name="user_id" placeholder="Kullanıcı ID" style="padding: 12px; background: #050507; border: 1px solid #1c1e24; color: #fff; width: 150px; border-radius: 4px;" required>
+                <select name="role" style="padding: 12px; background: #050507; border: 1px solid #1c1e24; color: #fff; width: 200px; border-radius: 4px;">
                     <option value="Üye">Üye</option>
                     <option value="Yetkili">Yetkili</option>
                     <option value="Üst Yetkili">Üst Yetkili</option>
@@ -299,18 +305,11 @@
                 </select>
                 <button type="submit" class="btn-action" style="width: auto; padding: 0 30px;">Ata</button>
             </form>
-
             <table class="admin-table">
-                <thead>
-                    <tr><th>ID</th><th>Kullanıcı Adı</th><th>Atanmış Rol</th></tr>
-                </thead>
+                <thead><tr><th>ID</th><th>Kullanıcı Adı</th><th>Atanmış Rol</th></tr></thead>
                 <tbody>
                     {% for u in all_users %}
-                    <tr>
-                        <td>{{ u.id }}</td>
-                        <td>{{ u.username }}</td>
-                        <td style="color: #fff; font-weight: 500;">{{ u.role }}</td>
-                    </tr>
+                    <tr><td>{{ u.id }}</td><td>{{ u.username }}</td><td style="color: #fff;">{{ u.role }}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -318,5 +317,61 @@
         {% endif %}
     </section>
 
+    <script>
+        const canvas = document.getElementById('lineCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Çizgi Ayarları (Turkuaz ve Pembe hatlar)
+        const lines = [
+            { xStart: 0.3, color: 'rgba(255, 82, 163, 0.45)', speed: 0.008, offset: 0 },
+            { xStart: 0.35, color: 'rgba(255, 82, 163, 0.2)', speed: 0.005, offset: 2 },
+            { xStart: 0.65, color: 'rgba(65, 187, 255, 0.45)', speed: 0.008, offset: 1 },
+            { xStart: 0.7, color: 'rgba(65, 187, 255, 0.2)', speed: 0.006, offset: 3 }
+        ];
+
+        function drawLines() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const vanishingY = canvas.height * 0.2; // Perspektif kaçış noktası (Yukarıda)
+
+            lines.forEach(line => {
+                line.offset += line.speed;
+                if (line.offset > 1) line.offset = 0;
+
+                ctx.beginPath();
+                ctx.strokeStyle = line.color;
+                ctx.lineWidth = 3;
+
+                // Perspektif yol çizimi (Sonsuz döngü hissi)
+                for (let i = 0; i <= 20; i++) {
+                    let t = (i / 20) + line.offset;
+                    if (t > 1) t -= 1;
+
+                    // Eğri derinlik hesabı
+                    let currentY = vanishingY + (canvas.height - vanishingY) * t;
+                    let targetX = centerX + (canvas.width * (line.xStart - 0.5)) * (t * t);
+
+                    if (i === 0) {
+                        ctx.moveTo(targetX, currentY);
+                    } else {
+                        ctx.lineTo(targetX, currentY);
+                    }
+                }
+                ctx.stroke();
+            });
+
+            requestAnimationFrame(drawLines);
+        }
+
+        drawLines();
+    </script>
 </body>
 </html>
