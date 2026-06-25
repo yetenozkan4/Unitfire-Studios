@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unitfire Studios | Yönetim ve Proje Portalı</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #0f111a; color: #ffffff; padding: 30px; }
+        .wrapper { max-width: 1200px; margin: 0 auto; }
+        
+        header { border-bottom: 2px solid #1f2335; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 2rem; font-weight: 800; color: #41bbff; text-transform: uppercase; }
+        
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; font-weight: bold; }
+        .alert-success { background-color: #1b5e20; color: #e8f5e9; }
+        .alert-danger { background-color: #b71c1c; color: #ffebee; }
+        .alert-info { background-color: #0d47a1; color: #e3f2fd; }
+
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+        .card { background-color: #1a1d2e; border: 1px solid #2a2f4c; border-radius: 8px; padding: 25px; margin-bottom: 25px; }
+        .card h2 { color: #41bbff; margin-bottom: 20px; font-size: 1.5rem; border-bottom: 1px solid #2a2f4c; padding-bottom: 10px; }
+        
+        /* Form Elemanları */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #afb2bb; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 10px; background-color: #0f111a; border: 1px solid #2a2f4c; border-radius: 4px; color: white; font-size: 1.1rem; }
+        .btn { display: inline-block; width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold; font-size: 1rem; cursor: pointer; text-align: center; text-decoration: none; }
+        .btn-primary { background-color: #41bbff; color: #0f111a; }
+        .btn-primary:hover { background-color: #3199d4; }
+        .btn-danger { background-color: #f44336; color: white; }
+
+        /* Proje Kutuları */
+        .project-list { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .project-item { background-color: #0f111a; padding: 15px; border-radius: 6px; border-left: 4px solid #41bbff; }
+        .project-item h4 { font-size: 1.2rem; margin-bottom: 8px; }
+        .badge { display: inline-block; padding: 4px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 3px; background-color: #2a2f4c; color: #41bbff; margin-top: 10px; }
+
+        /* Kullanıcı Bilgi Alanı */
+        .user-status { background-color: #24283b; padding: 15px; border-radius: 6px; text-align: center; }
+        .role-badge { display: inline-block; padding: 6px 12px; font-weight: bold; border-radius: 20px; margin-top: 10px; font-size: 0.9rem; }
+        .role-admin { background-color: #ff3838; color: white; }
+        .role-yonetici { background-color: #ff9f1a; color: black; }
+        .role-ust { background-color: #c56cf0; color: white; }
+        .role-yetkili { background-color: #17c0eb; color: black; }
+        .role-uye { background-color: #2ecc71; color: black; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <header>
+            <div class="logo">Unitfire Studios</div>
+            <div><strong>Sistem Durumu:</strong> Çevrimiçi</div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                --{% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="main-grid">
+            <div>
+                <div class="card">
+                    <h2>Geliştirilen Aktif Projeler</h2>
+                    <div class="project-list">
+                        <div class="project-item">
+                            <h4>Blindcam</h4>
+                            <p>Zifiri karanlık, telsiz efektleri ve hayatta kalma mekanikleri üzerine kurulu atmosferik gerilim.</p>
+                            <span class="badge">Ön Geliştirme</span>
+                        </div>
+                        <div class="project-item">
+                            <h4>Virus Extreme</h4>
+                            <p>DNA mutasyon mimarisi ve küresel strateji algoritmaları barındıran simülasyon dünyası.</p>
+                            <span class="badge">Planlama</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
+                <div class="card" style="border-color: #ff9f1a;">
+                    <h2 style="color: #ff9f1a;">Yönetici Atama Paneli</h2>
+                    <form action="/update_role" method="POST">
+                        <div class="form-group">
+                            <label>Kullanıcı Veritabanı ID Numarası:</label>
+                            <input type="number" name="user_id" class="form-control" placeholder="Örn: 1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Atanacak Yeni Rol:</label>
+                            <select name="role" class="form-control">
+                                <option value="Üye">Üye (Normal)</option>
+                                <option value="Yetkili">Yetkili</option>
+                                <option value="Üst Yetkili">Üst Yetkili</option>
+                                <option value="Yönetici">Yönetici</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn" style="background-color: #ff9f1a; color: black;">Rolü Güncelle ve Yetkilendir</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <div>
+                {% if not current_user.is_authenticated %}
+                <div class="card">
+                    <h2>Kullanıcı Girişi</h2>
+                    <form action="/login" method="POST">
+                        <div class="form-group">
+                            <label>Kullanıcı Adı:</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre:</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Yeni Stüdyo Kaydı</h2>
+                    <form action="/register" method="POST">
+                        <div class="form-group">
+                            <label>Kullanıcı Adı Belirleyin:</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre Belirleyin:</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn" style="background-color: #2ecc71; color: white;">Hesap Oluştur (Oto-Üye)</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="card">
+                    <h2>Profil Bilgileri</h2>
+                    <div class="user-status">
+                        <h3>Hoş geldin, {{ current_user.username }}!</h3>
+                        <p style="margin-top: 10px; color: #afb2bb;">Sistem Kimlik ID: {{ current_user.id }}</p>
+                        
+                        {% if current_user.role == 'Administrator' %}
+                            <span class="role-badge role-admin">Rütbe: {{ current_user.role }}</span>
+                        {% elif current_user.role == 'Yönetici' %}
+                            <span class="role-badge role-yonetici">Rütbe: {{ current_user.role }}</span>
+                        {% elif current_user.role == 'Üst Yetkili' %}
+                            <span class="role-badge role-ust">Rütbe: {{ current_user.role }}</span>
+                        {% elif current_user.role == 'Yetkili' %}
+                            <span class="role-badge role-yetkili">Rütbe: {{ current_user.role }}</span>
+                        {% else %}
+                            <span class="role-badge role-uye">Rütbe: {{ current_user.role }}</span>
+                        {% endif %}
+                        
+                        <a href="/logout" class="btn btn-danger" style="margin-top: 25px;">Oturumu Kapat</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
