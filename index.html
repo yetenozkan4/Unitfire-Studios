@@ -2,78 +2,53 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Unitfire Studios | Detaylı Yönetim Paneli</title>
+    <title>Unitfire Studios | Yönetim</title>
     <style>
-        /* CSS BLOKLARI AÇIK VE DETAYLI */
-        body { background:#050507; color:#fff; font-family: 'Arial', sans-serif; margin:0; }
-        nav { padding:40px; display:flex; gap:20px; border-bottom:1px solid #222; }
+        body { background:#050507; color:#fff; font-family:sans-serif; margin:0; }
+        nav { padding:40px; display:flex; gap:20px; }
         .canvas-area { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
-        .panel { background:#111; padding:30px; border:1px solid #41bbff; margin:50px; border-radius:10px; }
-        
-        input, button, select { padding:12px; background:#000; color:#fff; border:1px solid #444; margin-right:10px; }
-        button { cursor:pointer; background:#222; }
+        .panel { background:#111; padding:20px; border:1px solid #41bbff; margin:20px; }
+        input, button, select { padding:10px; background:#000; color:#fff; border:1px solid #333; }
     </style>
 </head>
 <body>
-
     <nav>
         {% if not current_user.is_authenticated %}
-        <form action="/login" method="POST">
-            <input name="username" placeholder="Kullanıcı Adı">
-            <input type="password" name="password" placeholder="Şifre">
-            <button type="submit">GİRİŞ YAP</button>
-        </form>
-        <form action="/register" method="POST">
-            <input name="username" placeholder="Yeni Üye Adı">
-            <input type="password" name="password" placeholder="Şifre">
-            <button type="submit">KAYIT OL</button>
-        </form>
+        <form action="/login" method="POST"><input name="username" placeholder="User"><input type="password" name="password" placeholder="Pass"><button>LOGIN</button></form>
+        <form action="/register" method="POST"><input name="username" placeholder="New User"><input type="password" name="password" placeholder="Pass"><button>REGISTER</button></form>
         {% else %}
-        <div>Logged in: {{ current_user.username }} | Rol: {{ current_user.role }}</div>
-        <a href="/logout" style="color:#fff;">ÇIKIŞ YAP</a>
+        <span>Logged: {{ current_user.username }} ({{ current_user.role }})</span>
+        <a href="/logout" style="color:#fff;">LOGOUT</a>
         {% endif %}
     </nav>
-
     <canvas id="roadCanvas" class="canvas-area"></canvas>
-
     {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
     <div class="panel">
-        <h2>DETAYLI ROL YÖNETİMİ</h2>
-        <p>Aşağıdaki listeden kullanıcıların yetkilerini tek tuşla değiştirebilirsiniz:</p>
+        <h2>YÖNETİCİ PANELİ</h2>
         {% for u in all_users %}
-        <div style="margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-            <strong>{{ u.username }}</strong> — Mevcut Rol: <em>{{ u.role }}</em>
-            <form action="/update_role" method="POST" style="display:inline;">
-                <input type="hidden" name="user_id" value="{{ u.id }}">
-                <select name="role" onchange="this.form.submit()">
-                    <option value="Üye" {% if u.role=='Üye' %}selected{% endif %}>Üye</option>
-                    <option value="Yetkili" {% if u.role=='Yetkili' %}selected{% endif %}>Yetkili</option>
-                    <option value="Yönetici" {% if u.role=='Yönetici' %}selected{% endif %}>Yönetici</option>
-                </select>
-            </form>
-        </div>
+        <form action="/update_role" method="POST" style="margin-bottom:5px;">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            {{ u.username }} - <b>{{ u.role }}</b>
+            <select name="role" onchange="this.form.submit()">
+                <option value="Üye" {% if u.role=='Üye' %}selected{% endif %}>Üye</option>
+                <option value="Yetkili" {% if u.role=='Yetkili' %}selected{% endif %}>Yetkili</option>
+                <option value="Yönetici" {% if u.role=='Yönetici' %}selected{% endif %}>Yönetici</option>
+            </select>
+        </form>
         {% endfor %}
     </div>
     {% endif %}
-
     <script>
-        const c = document.getElementById('roadCanvas');
-        const ctx = c.getContext('2d');
-        let w = c.width = window.innerWidth;
-        let h = c.height = window.innerHeight;
-
-        function drawEffect() {
-            ctx.fillStyle = 'rgba(0,0,0,0.1)'; 
-            ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle = '#41bbff'; 
-            ctx.lineWidth = 2;
-            ctx.beginPath();
+        const c = document.getElementById('roadCanvas'), ctx = c.getContext('2d');
+        let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
+        function draw() {
+            ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle = '#41bbff'; ctx.beginPath();
             ctx.moveTo(w/2, h); ctx.lineTo(w/2 - 300, 0);
             ctx.moveTo(w/2, h); ctx.lineTo(w/2 + 300, 0);
-            ctx.stroke(); 
-            requestAnimationFrame(drawEffect);
+            ctx.stroke(); requestAnimationFrame(draw);
         }
-        drawEffect();
+        draw();
     </script>
 </body>
 </html>
