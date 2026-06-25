@@ -2,20 +2,20 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UNITFIRE STUDIOS // GLOBAL CONNECT</title>
+    <title>UNITFIRE STUDIOS // OMNIRA INTEGRATED</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* CSS: Hem Stüdyo Teması Hem Omnira Panel Tasarımı */
+        /* 1. GÖRSEL DÜNYA (Otoban + Stüdyo) */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { background:#050507; color:#fff; font-family:'Rajdhani', sans-serif; overflow-x:hidden; }
-        nav { position:fixed; top:0; width:100%; padding:40px; display:flex; justify-content:space-between; z-index:1000; background:rgba(0,0,0,0.5); }
+        nav { position:fixed; top:0; width:100%; padding:40px; display:flex; justify-content:space-between; z-index:1000; background:rgba(0,0,0,0.6); }
         .links a { margin-left:30px; color:#fff; text-decoration:none; cursor:pointer; font-size:0.8rem; letter-spacing:2px; }
         #roadCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
         
-        /* OMNIRA PANEL (Tüm Fonksiyonlarıyla) */
-        #omnira-container { display:none; position:fixed; top:100px; right:50px; width:450px; height:80vh; background:#111; border:1px solid #41bbff; z-index:9999; padding:20px; border-radius:10px; overflow-y:auto; }
-        .input-box { width:100%; padding:10px; margin:10px 0; background:#000; border:1px solid #333; color:#fff; }
-        button { padding:10px; background:#41bbff; border:none; cursor:pointer; font-weight:bold; }
+        /* 2. OMNIRA YÖNETİM PANELİ (Admin + AI) */
+        #omnira-ui { display:none; position:fixed; top:100px; right:50px; width:500px; height:80vh; background:#1a1a1a; border:2px solid #41bbff; z-index:9999; border-radius:15px; padding:25px; overflow-y:auto; }
+        .input-box { width:100%; padding:12px; margin:10px 0; background:#000; border:1px solid #333; color:#fff; }
+        .btn { width:100%; padding:12px; background:#41bbff; border:none; cursor:pointer; color:#000; font-weight:bold; }
     </style>
 </head>
 <body>
@@ -24,62 +24,59 @@
         <div class="logo">UNITFIRE STUDIOS</div>
         <div class="links">
             <a href="#home">HOME</a>
-            <a onclick="document.getElementById('omnira-container').style.display='block'">ARTIFICIAL INTELLIGENCE - AI</a>
-            <a href="#support">SUPPORT</a>
-            <a href="#management">MANAGEMENT</a>
+            <a onclick="document.getElementById('omnira-ui').style.display='block'">ARTIFICIAL INTELLIGENCE - AI</a>
+            <a href="#management">ADMIN PANEL</a>
         </div>
     </nav>
 
     <canvas id="roadCanvas"></canvas>
 
-    <div id="omnira-container">
-        <h2 style="color:#41bbff;">OMNIRA CONTROL CENTER</h2>
-        <div id="login-screen">
-            <input id="login-email" class="input-box" placeholder="Email / ID">
-            <input id="login-password" type="password" class="input-box" placeholder="Password">
-            <button onclick="login()">LOGIN TO SYSTEM</button>
+    <div id="omnira-ui">
+        <h2 style="color:#41bbff; font-family:'Orbitron';">SYSTEM CONTROL</h2>
+        
+        <div id="login-block">
+            <input id="email" class="input-box" placeholder="ID / E-mail">
+            <input id="pass" type="password" class="input-box" placeholder="Password">
+            <button class="btn" onclick="login()">SİSTEME GİRİŞ YAP</button>
         </div>
-        <div id="chat-ui" style="display:none; margin-top:20px;">
-            <div id="chat-messages" style="height:300px; background:#000; overflow-y:scroll; margin-bottom:10px;"></div>
-            <input id="user-msg" class="input-box" placeholder="Omnira'ya sor...">
-            <button onclick="sendMessage()">GÖNDER</button>
-            <button onclick="document.getElementById('omnira-container').style.display='none'" style="background:#e05555;">KAPAT</button>
+
+        <div id="panel-block" style="display:none;">
+            <div id="chat-box" style="height:350px; background:#000; margin-bottom:15px; overflow-y:scroll; padding:10px;"></div>
+            <input id="msg" class="input-box" placeholder="Komut yaz...">
+            <button class="btn" onclick="send()">KOMUT GÖNDER</button>
+            <button class="btn" style="background:#e05555; margin-top:10px;" onclick="location.reload()">ÇIKIŞ YAP</button>
         </div>
     </div>
 
     <script>
-        // 1. OTOBAN EFEKTİ
+        // OTOBAN EFEKTİ
         const canvas = document.getElementById('roadCanvas');
         const ctx = canvas.getContext('2d');
         function draw() {
-            ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0,0,window.innerWidth, window.innerHeight);
+            ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(0,0,window.innerWidth, window.innerHeight);
             ctx.strokeStyle = '#41bbff'; ctx.beginPath();
-            ctx.moveTo(window.innerWidth/2, window.innerHeight); ctx.lineTo(window.innerWidth/2 - 300, 0);
-            ctx.moveTo(window.innerWidth/2, window.innerHeight); ctx.lineTo(window.innerWidth/2 + 300, 0);
+            ctx.moveTo(window.innerWidth/2, window.innerHeight); ctx.lineTo(window.innerWidth/2 - 400, 0);
+            ctx.moveTo(window.innerWidth/2, window.innerHeight); ctx.lineTo(window.innerWidth/2 + 400, 0);
             ctx.stroke();
             requestAnimationFrame(draw);
         }
         draw();
 
-        // 2. OMNIRA YÖNETİM VE CHAT (Tüm Fonksiyonlar)
+        // OMNIRA YÖNETİM
         async function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            // Buraya kendi API login postunu ekle
-            alert("Sistem bağlandı: " + email);
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('chat-ui').style.display = 'block';
+            document.getElementById('login-block').style.display = 'none';
+            document.getElementById('panel-block').style.display = 'block';
         }
 
-        async function sendMessage() {
-            const msg = document.getElementById('user-msg').value;
+        async function send() {
+            const m = document.getElementById('msg').value;
             const res = await fetch('/chat', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({messages: [{role: 'user', content: msg}]})
+                body: JSON.stringify({messages: [{role: 'user', content: m}]})
             });
-            const data = await res.json();
-            document.getElementById('chat-messages').innerHTML += `<p>Omnira: ${data.choices[0].message.content}</p>`;
+            const d = await res.json();
+            document.getElementById('chat-box').innerHTML += `<p><b>Siz:</b> ${m}</p><p style="color:#41bbff;"><b>Omnira:</b> ${d.choices[0].message.content}</p>`;
         }
     </script>
 </body>
