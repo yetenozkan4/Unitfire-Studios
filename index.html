@@ -126,7 +126,7 @@
             z-index: 5;
             text-align: center;
             max-width: 700px;
-            background: linear-gradient(rgba(3,3,5,0) 0%, rgba(3,3,5,0.7) 50%, rgba(3,3,5,0) 100%);
+            background: linear-gradient(rgba(3,3,5,0) 0%, rgba(3,3,5,0.85) 50%, rgba(3,3,5,0) 100%);
             padding: 40px 20px;
         }
 
@@ -150,7 +150,7 @@
             font-family: 'Times New Roman', Times, serif;
             font-style: italic;
             font-size: 1.3rem;
-            color: #ff52a3; /* Pembe Vurgu */
+            color: #ff52a3;
             text-shadow: 0 0 15px rgba(255, 82, 163, 0.4);
         }
 
@@ -322,56 +322,72 @@
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Çizgi Ayarları (Turkuaz ve Pembe hatlar)
-        const lines = [
-            { xStart: 0.3, color: 'rgba(255, 82, 163, 0.45)', speed: 0.008, offset: 0 },
-            { xStart: 0.35, color: 'rgba(255, 82, 163, 0.2)', speed: 0.005, offset: 2 },
-            { xStart: 0.65, color: 'rgba(65, 187, 255, 0.45)', speed: 0.008, offset: 1 },
-            { xStart: 0.7, color: 'rgba(65, 187, 255, 0.2)', speed: 0.006, offset: 3 }
-        ];
+        // Parçacık dizisi (Mavi ve Pembe hatlar)
+        const particleCount = 60;
+        const particles = [];
+        const colors = ['#41bbff', '#ff52a3']; // Turkuaz ve Pembe
 
-        function drawLines() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const centerX = canvas.width / 2;
-            const vanishingY = canvas.height * 0.2; // Perspektif kaçış noktası (Yukarıda)
-
-            lines.forEach(line => {
-                line.offset += line.speed;
-                if (line.offset > 1) line.offset = 0;
-
-                ctx.beginPath();
-                ctx.strokeStyle = line.color;
-                ctx.lineWidth = 3;
-
-                // Perspektif yol çizimi (Sonsuz döngü hissi)
-                for (let i = 0; i <= 20; i++) {
-                    let t = (i / 20) + line.offset;
-                    if (t > 1) t -= 1;
-
-                    // Eğri derinlik hesabı
-                    let currentY = vanishingY + (canvas.height - vanishingY) * t;
-                    let targetX = centerX + (canvas.width * (line.xStart - 0.5)) * (t * t);
-
-                    if (i === 0) {
-                        ctx.moveTo(targetX, currentY);
-                    } else {
-                        ctx.lineTo(targetX, currentY);
-                    }
-                }
-                ctx.stroke();
+        // İlk parçacıkları oluştur
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: (Math.random() - 0.5) * canvas.width,  // Merkezden uzaklık X
+                y: (Math.random() - 0.5) * canvas.height, // Merkezden uzaklık Y
+                z: Math.random() * canvas.width,          // Derinlik (Mesafe)
+                color: colors[Math.floor(Math.random() * colors.length)]
             });
-
-            requestAnimationFrame(drawLines);
         }
 
-        drawLines();
+        function animate() {
+            // Hafif siyah transparan katman ekleyerek çizgilerin arkasında kuyruk (blur) bırakmasını sağlıyoruz
+            ctx.fillStyle = 'rgba(3, 3, 5, 0.12)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            particles.forEach(p => {
+                // Parçacığı durmadan ileriye (bize doğru) yürüt
+                p.z -= 4.5; // İlerleme hızı (Hızlandırmak için burayı artırabilirsin)
+
+                // Eğer parçacık ekranın tamamen önüne geldiyse (bizi geçtiyse) tekrar en arkaya at
+                if (p.z <= 0) {
+                    p.z = canvas.width;
+                    p.x = (Math.random() - 0.5) * canvas.width;
+                    p.y = (Math.random() - 0.5) * canvas.height;
+                }
+
+                // 3D Perspektif Projeksiyon Hesaplamaları
+                // Nesne yaklaştıkça (z azaldıkça) ekrandaki koordinatları merkezden dışarıya doğru fırlar
+                const k = 400 / p.z;
+                const px = p.x * k + cx;
+                const py = p.y * k + cy;
+
+                // Bir önceki karedeki konumunu hesapla (Böylece akıcı bir çizgi/kuyruk çizeceğiz)
+                const oldK = 400 / (p.z + 4.5);
+                const ox = p.x * oldK + cx;
+                const oy = p.y * oldK + cy;
+
+                // Eğer ekrandan dışarı taşmadıysa çizgiyi çiz
+                if (px >= 0 && px <= canvas.width && py >= 0 && py <= canvas.height) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = p.color;
+                    ctx.lineWidth = (1 - p.z / canvas.width) * 3; // Yaklaştıkça çizgi kalınlaşır
+                    ctx.moveTo(ox, oy);
+                    ctx.lineTo(px, py);
+                    ctx.stroke();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
     </script>
 </body>
 </html>
