@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -9,19 +10,16 @@ app.config['SECRET_KEY'] = 'unitfire_secret_2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///unitfire.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Veritabanı ve Oturum Yönetimi
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'home'
 
-# Kullanıcı Modeli Tanımı
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     role = db.Column(db.String(50), default='Üye')
 
-# Admin Tanımlama Fonksiyonu
 def get_admin(id, name, pwd):
     u = User(id=id, username=name, role="Administrator")
     u.password = generate_password_hash(pwd)
@@ -33,7 +31,6 @@ def load_user(user_id):
     if user_id == "9992": return get_admin(9992, "admin2", "UnitfireAdmin2!")
     return User.query.get(int(user_id))
 
-# --- ROUTE TANIMLAMALARI ---
 @app.route('/')
 def home():
     users = User.query.all() if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] else []
@@ -72,6 +69,9 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+# RENDER İÇİN PORT AYARLARI
 if __name__ == '__main__':
     with app.app_context(): db.create_all()
-    app.run(debug=True)
+    # Render'ın verdiği portu otomatik yakalar, yoksa 5000'de çalışır
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
