@@ -2,83 +2,99 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Unitfire Studios // GLOBAL CONNECT</title>
+    <title>Unitfire Studios</title>
     <style>
-        body, html { margin:0; padding:0; background:#050507; color:#fff; font-family:sans-serif; overflow-x:hidden; }
-        
-        /* Eski Tasarım Menüsü */
+        body, html { margin:0; padding:0; background:#050507; color:#fff; font-family:-apple-system, sans-serif; overflow-x:hidden; }
         nav { position:fixed; top:40px; left:40px; z-index:999; display:flex; gap:30px; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px; }
-        nav a { color:#555; text-decoration:none; transition:0.3s; }
-        nav a:hover { color:#fff; }
+        nav a { color:#555; text-decoration:none; transition:0.3s; } nav a:hover { color:#fff; }
         
-        /* Eski Tasarım Otoban */
-        #roadCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+        section { height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; }
+        canvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
         
-        /* Yönetim Paneli (Gizli/Admin özel) */
-        .admin-panel { background:#111; color:#fff; padding:20px; border-top:2px solid #41bbff; margin-top:100vh; }
-        input, select { background:#000; color:#fff; border:1px solid #333; padding:5px; }
+        .content, .auth-box, .admin-panel { position:relative; z-index:10; text-align:center; }
+        .auth-box { background:#0a0a0c; padding:40px; border:1px solid #1a1a1a; width:300px; }
+        input, button, select { width:100%; padding:10px; margin:5px 0; background:#000; border:1px solid #333; color:#fff; }
+        button { cursor:pointer; background:#fff; color:#000; font-weight:bold; }
+        .admin-panel { background:#111; padding:20px; border:1px solid #41bbff; width:80%; margin-top:20px; }
     </style>
 </head>
 <body>
 
     <nav>
-        <a href="/">HOME</a>
-        {% if not current_user.is_authenticated %}
-        <form action="/login" method="POST" style="display:flex; gap:10px;">
-            <input name="username" placeholder="ID">
-            <input type="password" name="password" placeholder="PASS">
-            <button>GİRİŞ</button>
-        </form>
-        {% else %}
-        <a href="/logout">ÇIKIŞ ({{ current_user.username }})</a>
-        {% endif %}
+        <a href="#home">HOME</a>
+        <a href="#games">GAMES</a>
+        <a href="#auth">ACCOUNT</a>
     </nav>
 
-    <canvas id="roadCanvas"></canvas>
+    <section id="games">
+        <canvas id="warpCanvas"></canvas>
+        <canvas id="roadCanvas"></canvas>
+        <div class="content"><h1>UNITFIRE</h1><p>Code. Tell. Touch.</p></div>
+    </section>
 
-    {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
-    <div class="admin-panel">
-        <h2>YÖNETİM PANELİ</h2>
-        {% for u in all_users %}
-        <div style="margin-bottom:10px;">
-            {{ u.username }} [{{ u.role }}]
-            <form action="/update_role" method="POST" style="display:inline;">
-                <input type="hidden" name="user_id" value="{{ u.id }}">
-                <select name="role" onchange="this.form.submit()">
-                    <option value="Üye">Üye</option>
-                    <option value="Yetkili">Yetkili</option>
-                    <option value="Yönetici">Yönetici</option>
-                </select>
-            </form>
+    <section id="auth">
+        <div class="auth-box">
+            {% if not current_user.is_authenticated %}
+            <form action="/login" method="POST"><input name="username" placeholder="Username"><input type="password" name="password" placeholder="Pass"><button>LOGIN</button></form>
+            <form action="/register" method="POST"><input name="username" placeholder="New User"><input type="password" name="password" placeholder="Pass"><button>REGISTER</button></form>
+            {% else %}
+            <h3>Logged as: {{ current_user.username }} ({{ current_user.role }})</h3>
+            <a href="/logout" style="color:red;">LOGOUT</a>
+            {% endif %}
         </div>
-        {% endfor %}
-    </div>
-    {% endif %}
+
+        {% if current_user.is_authenticated and current_user.role in ['Yönetici', 'Administrator'] %}
+        <div class="admin-panel">
+            <h2>YÖNETİM PANELİ</h2>
+            {% for u in all_users %}
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                {{ u.username }} ({{ u.role }})
+                <form action="/update_role" method="POST">
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <select name="role" onchange="this.form.submit()">
+                        <option value="Üye" {% if u.role=='Üye' %}selected{% endif %}>Üye</option>
+                        <option value="Yetkili" {% if u.role=='Yetkili' %}selected{% endif %}>Yetkili</option>
+                        <option value="Yönetici" {% if u.role=='Yönetici' %}selected{% endif %}>Yönetici</option>
+                    </select>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
 
     <script>
-        const canvas = document.getElementById('roadCanvas');
-        const ctx = canvas.getContext('2d');
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
-        let pathPos = 0;
+        // Warp Efekti
+        const wC = document.getElementById('warpCanvas'), wCtx = wC.getContext('2d');
+        let w = wC.width = window.innerWidth, h = wC.height = window.innerHeight;
+        let particles = Array.from({length:150}, () => ({x:Math.random()*w, y:Math.random()*h, z:Math.random()*1000}));
+        
+        function drawWarp() {
+            wCtx.fillStyle = 'rgba(5,5,7,0.1)'; wCtx.fillRect(0,0,w,h);
+            particles.forEach(p => {
+                p.z -= 10; if(p.z <= 0) p.z = 1000;
+                wCtx.fillStyle = '#41bbff'; wCtx.fillRect((p.x - w/2)*(1000/p.z) + w/2, (p.y - h/2)*(1000/p.z) + h/2, 2, 2);
+            });
+            requestAnimationFrame(drawWarp);
+        }
 
-        function draw() {
-            ctx.fillStyle = 'rgba(5, 5, 7, 0.15)'; ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle = '#41bbff'; ctx.lineWidth = 4;
+        // Otoban Efekti
+        const rC = document.getElementById('roadCanvas'), rCtx = rC.getContext('2d');
+        let pathPos = 0;
+        function drawRoad() {
+            rCtx.fillStyle = 'rgba(5,5,7,0.05)'; rCtx.fillRect(0,0,w,h);
             pathPos += 8; if(pathPos > 100) pathPos = 0;
-            
-            // Otoban Çizgileri
-            for(let x of [w/2-150, w/2+150]) {
-                ctx.beginPath();
+            [w/2-150, w/2+150].forEach(x => {
+                rCtx.beginPath(); rCtx.strokeStyle = '#ff52a3';
                 for(let i=0; i<10; i++) {
                     let y = (i * 100 + pathPos) % h;
-                    ctx.moveTo(x, y); ctx.lineTo(x, y + 50);
+                    rCtx.moveTo(x, y); rCtx.lineTo(x, y + 50);
                 }
-                ctx.stroke();
-            }
-            requestAnimationFrame(draw);
+                rCtx.stroke();
+            });
+            requestAnimationFrame(drawRoad);
         }
-        draw();
+        drawWarp(); drawRoad();
     </script>
 </body>
 </html>
